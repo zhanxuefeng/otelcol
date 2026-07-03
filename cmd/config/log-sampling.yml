@@ -1,0 +1,33 @@
+receivers:
+  file_log:
+    include: ["./testdata/log-sampling.log"]
+    start_at: beginning
+    include_file_record_number: true
+    include_file_record_offset: true
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "localhost:4317"
+exporters:
+  debug:
+    verbosity: 2
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - otlp
+      exporters:
+        - debug
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: '0.0.0.0'
+                port: 18888
+        - periodic:
+            exporter:
+              otlp:
+                protocol: grpc
+                endpoint: localhost:4317
